@@ -75,6 +75,30 @@ export class DamageAnimPhase extends PokemonPhase {
   }
 
   override end() {
+    // 공격받은 포켓몬 정보
+    const targetPokemon = this.getPokemon();
+    const targetInfo = targetPokemon
+      ? { name: targetPokemon.getName(), hp: targetPokemon.getHP(), status: targetPokemon.getStatus() }
+      : { name: "Unknown", hp: 0, status: "fainted" };
+
+    // 결과 객체 생성
+    const result = {
+      phase: "Damage Anim Phase",
+      target: targetInfo,
+      damage: {
+        amount: this.amount,
+        result: this.damageResult.toString(),
+        critical: this.critical
+      },
+      battle: {
+        spec: this.scene.currentBattle.battleSpec.toString()
+      }
+    };
+
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+
+    // 기존 종료 동작 호출
     if (this.scene.currentBattle.battleSpec === BattleSpec.FINAL_BOSS) {
       this.scene.initFinalBossPhaseTwo(this.getPokemon());
     } else {

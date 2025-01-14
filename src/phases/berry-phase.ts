@@ -10,6 +10,8 @@ import { CommonAnimPhase } from "./common-anim-phase";
 
 /** The phase after attacks where the pokemon eat berries */
 export class BerryPhase extends FieldPhase {
+  private berriesUsedCount: number = 0;
+
   start() {
     super.start();
 
@@ -20,21 +22,39 @@ export class BerryPhase extends FieldPhase {
 
       if (hasUsableBerry) {
         const cancelled = new Utils.BooleanHolder(false);
-        pokemon.getOpponents().map((opp) => applyAbAttrs(PreventBerryUseAbAttr, opp, cancelled));
+        pokemon.getOpponents().map((opp) =>
+          applyAbAttrs(PreventBerryUseAbAttr, opp, cancelled)
+        );
 
         if (cancelled.value) {
-          pokemon.scene.queueMessage(i18next.t("abilityTriggers:preventBerryUse", { pokemonNameWithAffix: getPokemonNameWithAffix(pokemon) }));
+          pokemon.scene.queueMessage(
+            i18next.t("abilityTriggers:preventBerryUse", {
+              pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+            })
+          );
         } else {
           this.scene.unshiftPhase(
-            new CommonAnimPhase(this.scene, pokemon.getBattlerIndex(), pokemon.getBattlerIndex(), CommonAnim.USE_ITEM)
+            new CommonAnimPhase(
+              this.scene,
+              pokemon.getBattlerIndex(),
+              pokemon.getBattlerIndex(),
+              CommonAnim.USE_ITEM
+            )
           );
 
-          for (const berryModifier of this.scene.applyModifiers(BerryModifier, pokemon.isPlayer(), pokemon)) {
+          for (const berryModifier of this.scene.applyModifiers(
+            BerryModifier,
+            pokemon.isPlayer(),
+            pokemon
+          )) {
             if (berryModifier.consumed) {
               berryModifier.consumed = false;
               pokemon.loseHeldItem(berryModifier);
+              this.berriesUsedCount++; // 증가: 사용된 베리 수 카운트
             }
-            this.scene.eventTarget.dispatchEvent(new BerryUsedEvent(berryModifier)); // Announce a berry was used
+            this.scene.eventTarget.dispatchEvent(
+              new BerryUsedEvent(berryModifier)
+            ); // Announce a berry was used
           }
 
           this.scene.updateModifiers(pokemon.isPlayer());
@@ -45,5 +65,19 @@ export class BerryPhase extends FieldPhase {
     });
 
     this.end();
+  }
+
+  getResult(): object {
+    return {
+      phase: "Berry Phase",
+      status: "completed",
+      berriesUsed: this.berriesUsedCount,
+      totalPokemonChecked: this.scene.getField(true).length
+    };
+  }
+
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // JSON 형식으로 결과 출력
+    super.end();
   }
 }

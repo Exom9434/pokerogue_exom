@@ -44,4 +44,17 @@ export class BattlePhase extends Phase {
       duration: 750
     });
   }
+  getResult(): object {
+    return {
+      phase: "Battle Phase",
+      status: "completed",
+      enemyTrainerVisible: true,
+      spritesCount: this.scene.currentBattle.trainer?.getSprites().length || 0
+    };
+  }
+
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // JSON 형식으로 출력
+    super.end();
+  }
 }

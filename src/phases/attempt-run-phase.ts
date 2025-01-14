@@ -54,9 +54,23 @@ export class AttemptRunPhase extends PokemonPhase {
 
       this.scene.pushPhase(new BattleEndPhase(this.scene, false));
       this.scene.pushPhase(new NewBattlePhase(this.scene));
+      console.log(JSON.stringify({
+        phase: "AttemptRunPhase",
+        status: "end",
+        result: "success",
+        escapeChance: escapeChance.value,
+        attempts: this.scene.currentBattle.escapeAttempts
+      }, null, 2));
     } else {
       playerPokemon.turnData.failedRunAway = true;
       this.scene.queueMessage(i18next.t("battle:runAwayCannotEscape"), null, true, 500);
+      console.log(JSON.stringify({
+        phase: "AttemptRunPhase",
+        status: "end",
+        result: "failed",
+        escapeChance: escapeChance.value,
+        attempts: this.scene.currentBattle.escapeAttempts
+      }, null, 2));
     }
 
     this.end();
@@ -104,5 +118,12 @@ export class AttemptRunPhase extends PokemonPhase {
 
     // This will calculate the escape chance given all of the above and clamp it to the range of [`minChance`, `maxChance`]
     escapeChance.value = Phaser.Math.Clamp(Math.round((escapeSlope * speedRatio) + minChance + (escapeBonus * this.scene.currentBattle.escapeAttempts++)), minChance, maxChance);
+  }
+  end() {
+    console.log(JSON.stringify({
+      phase: "AttemptRunPhase",
+      status: "completed"
+    }, null, 2));
+    super.end();
   }
 }

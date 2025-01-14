@@ -14,6 +14,14 @@ export class Phase {
   }
 
   end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // JSON 형식으로 출력
     this.scene.shiftPhase();
+  }
+
+  getResult(): object {
+    return {
+      phase: "Generic Phase",
+      status: "completed"
+    };
   }
 }

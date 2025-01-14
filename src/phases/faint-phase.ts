@@ -215,4 +215,28 @@ export class FaintPhase extends PokemonPhase {
 
     return false;
   }
+  override end() {
+    // 쓰러진 포켓몬 정보와 턴 정보를 포함한 결과 객체 생성
+    const pokemon = this.getPokemon();
+    const result = {
+      phase: "Faint Phase",
+      pokemon: {
+        name: getPokemonNameWithAffix(pokemon),
+        species: pokemon.species.name,
+        level: pokemon.level,
+        isPlayer: pokemon.isPlayer(),
+        faintTurn: this.scene.currentBattle.turn
+      },
+      battle: {
+        type: this.scene.currentBattle.battleType.toString(),
+        playerFaints: this.scene.currentBattle.playerFaints,
+        enemyFaints: this.scene.currentBattle.enemyFaints
+      }
+    };
+
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+
+    super.end();
+  }
 }

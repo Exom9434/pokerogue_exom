@@ -171,6 +171,12 @@ export class AttemptCapturePhase extends PokemonPhase {
         });
       }
     });
+    console.log(JSON.stringify({
+      phase: "AttemptCapturePhase",
+      action: "start",
+      target: this.getPokemon()?.species?.name,
+      pokeballType: this.pokeballType
+    }, null, 2));
   }
 
   failCatch(shakeCount: integer) {
@@ -203,6 +209,12 @@ export class AttemptCapturePhase extends PokemonPhase {
 
     this.scene.currentBattle.lastUsedPokeball = this.pokeballType;
     this.removePb();
+    console.log(JSON.stringify({
+      phase: "AttemptCapturePhase",
+      action: "failCatch",
+      target: this.getPokemon()?.species?.name,
+      shakeCount
+    }, null, 2));
     this.end();
   }
 
@@ -236,6 +248,12 @@ export class AttemptCapturePhase extends PokemonPhase {
         this.scene.unshiftPhase(new VictoryPhase(this.scene, this.battlerIndex));
         this.scene.pokemonInfoContainer.hide();
         this.removePb();
+        console.log(JSON.stringify({
+          phase: "AttemptCapturePhase",
+          action: "catch",
+          target: this.getPokemon()?.species?.name,
+          pokeballType: this.pokeballType
+        }, null, 2));
         this.end();
       };
       const removePokemon = () => {

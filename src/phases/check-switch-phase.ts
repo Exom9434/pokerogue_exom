@@ -61,4 +61,18 @@ export class CheckSwitchPhase extends BattlePhase {
       });
     });
   }
+  getResult(): object {
+    return {
+      phase: "CheckSwitchPhase",
+      status: "completed",
+      fieldIndex: this.fieldIndex,
+      useName: this.useName,
+      availableSwitch: this.scene.getPlayerParty().slice(1).filter(p => p.isActive()).length > 0,
+      pokemonName: this.scene.getPlayerField()[this.fieldIndex]?.getNameToRender()
+    };
+  }
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // JSON 형식으로 출력
+    super.end();
+  }
 }

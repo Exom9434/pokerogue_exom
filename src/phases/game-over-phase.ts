@@ -250,5 +250,37 @@ export class GameOverPhase extends BattlePhase {
       mysteryEncounterSaveData: this.scene.mysteryEncounterSaveData
     } as SessionSaveData;
   }
+  end(): void {
+    // 결과 객체 생성
+    const result = {
+      phase: "Game Over Phase",
+      isVictory: this.isVictory,
+      mode: this.scene.gameMode.modeId,
+      waveIndex: this.scene.currentBattle.waveIndex,
+      playerParty: this.scene.getPlayerParty().map(pokemon => ({
+        name: pokemon.getName(),
+        species: pokemon.species.name,
+        level: pokemon.level,
+        isShiny: pokemon.isShiny(),
+        hp: pokemon.getHP()
+      })),
+      enemyParty: this.scene.getEnemyParty().map(pokemon => ({
+        name: pokemon.getName(),
+        species: pokemon.species.name,
+        level: pokemon.level,
+        isShiny: pokemon.isShiny(),
+        hp: pokemon.getHP()
+      })),
+      score: this.scene.score,
+      money: this.scene.money,
+      modifiers: this.scene.findModifiers(() => true).map(modifier => modifier.getName())
+    };
+
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+
+    // 기존 종료 동작 수행
+    super.end();
+  }
 }
 
