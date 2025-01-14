@@ -1,3 +1,5 @@
+/// 상태이상
+
 import { randIntRange } from "#app/utils";
 import { StatusEffect } from "#enums/status-effect";
 import i18next, { ParseKeys } from "i18next";

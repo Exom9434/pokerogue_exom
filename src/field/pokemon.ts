@@ -109,11 +109,11 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
   public moveset: (PokemonMove | null)[];
   public status: Status | null;
   public friendship: integer;
+  public luck: integer;
   public metLevel: integer;
   public metBiome: Biome | -1;
   public metSpecies: Species;
   public metWave: number;
-  public luck: integer;
   public pauseEvolutions: boolean;
   public pokerus: boolean;
   public switchOutStatus: boolean;
@@ -1093,7 +1093,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
   getMaxHp(): integer {
     return this.getStat(Stat.HP);
   }
-
+  //전체체력-hp
   getInverseHp(): integer {
     return this.getMaxHp() - this.hp;
   }
@@ -1145,6 +1145,105 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
 
   isFusion(): boolean {
     return !!this.fusionSpecies;
+  }
+  // 포켓몬 ID 반환
+  getId(): integer {
+    return this.id;
+  }
+
+  // 포켓몬 종 이름 반환
+  getName(): string {
+    return this.name;
+  }
+
+  // 포켓몬 닉네임 반환 (닉네임이 없으면 종 이름 반환)
+  getNickname(): string {
+    return this.nickname || this.name;
+  }
+
+  // 포켓몬 종 정보 반환
+  getSpecies(): PokemonSpecies {
+    return this.species;
+  }
+
+  // 레벨 반환
+  getLevel(): integer {
+    return this.level;
+  }
+
+  // 경험치 반환
+  getExp(): integer {
+    return this.exp;
+  }
+
+  // 다음 레벨까지 필요한 경험치 반환
+  getLevelExp(): integer {
+    return this.levelExp;
+  }
+  /*중복함수 처리
+    // 성별 반환
+    getGender(): Gender {
+      return this.gender;
+    }
+    // 능력치 배열 반환
+    getStats(): integer[] {
+      return this.stats;
+    }
+    // 성격 반환
+    getNature(): Nature {
+      return this.nature;
+    }
+    // 이로치 여부 반환
+    isShiny(): boolean {
+      return this.shiny;
+    }
+    // 변종 타입 반환
+    getVariant(): Variant {
+      return this.variant;
+    }
+    // 전투 정보 반환
+    getBattleInfo(): BattleInfo {
+      return this.battleInfo;
+    }
+    // 포켓몬의 운(Luck) 반환
+    getLuck(): integer {
+      return this.luck;
+    }
+  */
+  // 현재 체력 반환
+  getHP(): integer {
+    return this.hp;
+  }
+
+  // 상태 효과 반환 (상태가 없을 경우 null 반환)
+  getStatus(): Status | null {
+    return this.status;
+  }
+
+
+  // 전투 데이터 반환
+  getBattleData(): PokemonBattleData {
+    return this.battleData;
+  }
+
+  // 진화 일시 중지 여부 반환
+  isEvolutionPaused(): boolean {
+    return this.pauseEvolutions;
+  }
+
+  // 진화 카운터 반환
+  getEvolutionCounter(): integer {
+    return this.evoCounter;
+  }
+
+  // 포켓몬의 친밀도(Friendship) 반환
+  getFriendship(): integer {
+    return this.friendship;
+  }
+
+  // 포커러스 감염 여부 반환
+  hasPokerus(): boolean {
+    return this.pokerus;
   }
 
   /**
@@ -4181,6 +4280,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
       return false;
     }
   }
+
 }
 
 export default interface Pokemon {

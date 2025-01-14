@@ -22,10 +22,11 @@ import { ArenaTagType } from "#app/enums/arena-tag-type";
 
 export class CommandPhase extends FieldPhase {
   protected fieldIndex: integer;
+  // 명령 결과를 저장하는 속성 추가
+  private currentCommandResult: { type: Command; success: boolean } | null = null;
 
   constructor(scene: BattleScene, fieldIndex: integer) {
     super(scene);
-
     this.fieldIndex = fieldIndex;
   }
 
@@ -283,6 +284,11 @@ export class CommandPhase extends FieldPhase {
     }
 
     if (success) {
+      // 명령 결과를 end 메서드에서 사용할 수 있도록 설정
+      this.currentCommandResult = {
+        type: command,
+        success: success
+      };
       this.end();
     }
 
@@ -306,6 +312,27 @@ export class CommandPhase extends FieldPhase {
   }
 
   end() {
-    this.scene.ui.setMode(Mode.MESSAGE).then(() => super.end());
+    const playerPokemon = this.scene.getPlayerPokemon();
+    const playerInfo = playerPokemon
+      ? { name: playerPokemon.getName(), hp: playerPokemon.getHP(), status: playerPokemon.getStatus() }
+      : { name: "Unknown", hp: 0, status: "fainted" };
+    const enemyPokemon = this.scene.getEnemyParty().find(p => p.isActive());
+    const enemyInfo = enemyPokemon
+      ? { name: enemyPokemon.getName(), hp: enemyPokemon.getHP(), status: enemyPokemon.getStatus() }
+      : { name: "None", hp: 0, status: "none" };
+    const availablePokemon = this.scene.getPokemonAllowedInBattle().map(p => p.getName());
+    const result = {
+      phase: "Command Phase",
+      fieldIndex: this.fieldIndex,
+      pokemon: playerInfo,
+      enemy: enemyInfo,
+      availablePokemon: availablePokemon,
+      battle: {
+        turn: this.scene.currentBattle.turn,
+        battleType: this.scene.currentBattle.battleType
+      }
+    };
+    console.log(JSON.stringify(result, null, 2)); // 결과 출력
+    super.end(); // 기존 종료 동작 호출
   }
 }

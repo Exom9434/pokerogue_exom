@@ -259,7 +259,7 @@ export default class BattleScene extends SceneBase {
   public pokeballCounts: PokeballCounts;
   public money: integer;
   public pokemonInfoContainer: PokemonInfoContainer;
-  private party: PlayerPokemon[];
+  public party: PlayerPokemon[];
   /** Session save data that pertains to Mystery Encounters */
   public mysteryEncounterSaveData: MysteryEncounterSaveData = new MysteryEncounterSaveData();
   /** If the previous wave was a MysteryEncounter, tracks the object with this variable. Mostly used for visual object cleanup */
@@ -853,7 +853,7 @@ starterColors를 빈 객체로 초기화합니다.
    * Does not actually check if the pokemon are on the field or not.
    * @returns array of {@linkcode PlayerPokemon}
    */
-  ///상대 필드 위의 포켓몬
+  ///내 필드 위의 포켓몬
   public getPlayerField(): PlayerPokemon[] {
     const party = this.getPlayerParty();
     return party.slice(0, Math.min(party.length, this.currentBattle?.double ? 2 : 1));
@@ -871,6 +871,7 @@ starterColors를 빈 객체로 초기화합니다.
    * @returns The first active enemy Pokémon on the field that is allowed in battle,
    *          or `undefined` if there are no valid Pokémon.
    */
+  /// 상대 필드 위의 포켓몬
   public getEnemyPokemon(includeSwitching: boolean = true): EnemyPokemon | undefined {
     return this.getEnemyField().find(p => p.isActive() && (includeSwitching || p.switchOutStatus === false));
   }
@@ -901,6 +902,7 @@ starterColors를 빈 객체로 초기화합니다.
    * @param activeOnly - Whether to include only active Pokémon, default is `false`.
    * @returns An array of Pokémon on the field, optionally filtered by active status.
    */
+  ///필드정보 가져오는 함수
   public getField(activeOnly: boolean = false): Pokemon[] {
     const ret = new Array(4).fill(null);
     const playerField = this.getPlayerField();

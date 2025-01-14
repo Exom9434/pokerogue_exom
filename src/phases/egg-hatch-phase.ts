@@ -210,6 +210,22 @@ export class EggHatchPhase extends Phase {
     } else {
       this.scene.time.delayedCall(250, () => this.scene.setModifiersVisible(true));
     }
+    // 결과 객체 생성
+    const result = {
+      phase: "Egg Hatch Phase",
+      hatchedPokemon: {
+        name: this.pokemon.getName(),
+        species: this.pokemon.species.name,
+        isShiny: this.pokemon.isShiny(),
+        ivs: this.pokemon.ivs,
+        eggMoveIndex: this.eggMoveIndex
+      },
+      battle: {
+        spec: this.scene.currentBattle.battleSpec.toString()
+      }
+    };
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
     super.end();
   }
 
@@ -455,5 +471,14 @@ export class EggHatchPhase extends Phase {
     this.eggHatchData = this.eggLapsePhase.generatePokemon(this.egg);
     this.eggMoveIndex = this.eggHatchData.eggMoveIndex;
     return this.eggHatchData.pokemon;
+  }
+  getResult(): object {
+    return {
+      pokemonName: this.pokemon.getName(),
+      species: this.pokemon.species.name,
+      isShiny: this.pokemon.isShiny(),
+      ivs: this.pokemon.ivs,
+      eggMoveIndex: this.eggMoveIndex
+    };
   }
 }

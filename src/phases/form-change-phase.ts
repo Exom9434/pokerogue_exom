@@ -164,6 +164,27 @@ export class FormChangePhase extends EvolutionPhase {
   }
 
   end(): void {
+    // 결과 객체 생성
+    const result = {
+      phase: "Form Change Phase",
+      pokemon: {
+        name: getPokemonNameWithAffix(this.pokemon),
+        species: this.pokemon.species.name,
+        form: this.formChange.formKey,
+        level: this.pokemon.level,
+        isShiny: this.pokemon.isShiny(),
+        variant: this.pokemon.variant
+      },
+      battle: {
+        mode: this.scene.ui.getMode().toString(),
+        isModal: this.modal
+      }
+    };
+
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+
+    // 폼 체인지 관련 처리
     this.pokemon.findAndRemoveTags(t => t.tagType === BattlerTagType.AUTOTOMIZED);
     if (this.modal) {
       this.scene.ui.revertMode().then(() => {
@@ -179,4 +200,5 @@ export class FormChangePhase extends EvolutionPhase {
       super.end();
     }
   }
+
 }

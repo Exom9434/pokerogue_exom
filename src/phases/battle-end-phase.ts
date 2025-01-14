@@ -10,7 +10,6 @@ export class BattleEndPhase extends BattlePhase {
 
   constructor(scene: BattleScene, isVictory: boolean) {
     super(scene);
-
     this.isVictory = isVictory;
   }
 
@@ -18,8 +17,13 @@ export class BattleEndPhase extends BattlePhase {
     super.start();
 
     this.scene.gameData.gameStats.battles++;
-    if (this.scene.gameMode.isEndless && this.scene.currentBattle.waveIndex + 1 > this.scene.gameData.gameStats.highestEndlessWave) {
-      this.scene.gameData.gameStats.highestEndlessWave = this.scene.currentBattle.waveIndex + 1;
+    if (
+      this.scene.gameMode.isEndless &&
+      this.scene.currentBattle.waveIndex + 1 >
+        this.scene.gameData.gameStats.highestEndlessWave
+    ) {
+      this.scene.gameData.gameStats.highestEndlessWave =
+        this.scene.currentBattle.waveIndex + 1;
     }
 
     if (this.isVictory) {
@@ -31,7 +35,10 @@ export class BattleEndPhase extends BattlePhase {
     }
 
     // Endless graceful end
-    if (this.scene.gameMode.isEndless && this.scene.currentBattle.waveIndex >= 5850) {
+    if (
+      this.scene.gameMode.isEndless &&
+      this.scene.currentBattle.waveIndex >= 5850
+    ) {
       this.scene.clearPhaseQueue();
       this.scene.unshiftPhase(new GameOverPhase(this.scene, true));
     }
@@ -52,7 +59,14 @@ export class BattleEndPhase extends BattlePhase {
 
     this.scene.clearEnemyHeldItemModifiers();
 
-    const lapsingModifiers = this.scene.findModifiers(m => m instanceof LapsingPersistentModifier || m instanceof LapsingPokemonHeldItemModifier) as (LapsingPersistentModifier | LapsingPokemonHeldItemModifier)[];
+    const lapsingModifiers = this.scene.findModifiers(
+      (m) =>
+        m instanceof LapsingPersistentModifier ||
+        m instanceof LapsingPokemonHeldItemModifier
+    ) as (
+      | LapsingPersistentModifier
+      | LapsingPokemonHeldItemModifier
+    )[];
     for (const m of lapsingModifiers) {
       const args: any[] = [];
       if (m instanceof LapsingPokemonHeldItemModifier) {
@@ -64,5 +78,29 @@ export class BattleEndPhase extends BattlePhase {
     }
 
     this.scene.updateModifiers().then(() => this.end());
+  }
+
+  getResult(): object {
+    return {
+      phase: "Battle End Phase",
+      status: "completed",
+      isVictory: this.isVictory,
+      battlesCompleted: this.scene.gameData.gameStats.battles,
+      trainersDefeated: this.scene.gameData.gameStats.trainersDefeated,
+      highestEndlessWave: this.scene.gameData.gameStats.highestEndlessWave,
+      scatteredMoneyCollected: !!this.scene.currentBattle.moneyScattered,
+      lapsingModifiersRemoved: this.scene
+        .findModifiers(
+          (m) =>
+            m instanceof LapsingPersistentModifier ||
+            m instanceof LapsingPokemonHeldItemModifier
+        )
+        .length,
+    };
+  }
+
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // JSON 형식으로 로깅
+    super.end();
   }
 }

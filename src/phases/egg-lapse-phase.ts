@@ -137,5 +137,40 @@ export class EggLapsePhase extends Phase {
     }, egg.id, EGG_SEED.toString());
     return newHatchData!;
   }
-
+  override end() {
+    // 부화된 포켓몬 정보 배열 생성
+    const hatchedPokemonInfo = this.eggHatchData.map((data) => ({
+      name: data.pokemon.getName(),
+      species: data.pokemon.species.name,
+      isShiny: data.pokemon.isShiny(),
+      ivs: data.pokemon.ivs,
+      eggMoveIndex: data.eggMoveIndex
+    }));
+    // 결과 객체 생성
+    const result = {
+      phase: "Egg Lapse Phase",
+      summary: {
+        totalHatched: hatchedPokemonInfo.length,
+        hatchedPokemon: hatchedPokemonInfo
+      },
+      battle: {
+        spec: this.scene.currentBattle.battleSpec.toString()
+      }
+    };
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+    // 기존 종료 동작 호출
+    super.end();
+  }
+  getResult(): object {
+    return {
+      hatchedPokemonCount: this.eggHatchData.length,
+      pokemonDetails: this.eggHatchData.map((data) => ({
+        name: data.pokemon.getName(),
+        species: data.pokemon.species.name,
+        isShiny: data.pokemon.isShiny(),
+        ivs: data.pokemon.ivs
+      }))
+    };
+  }
 }

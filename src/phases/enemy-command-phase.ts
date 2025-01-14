@@ -31,9 +31,7 @@ export class EnemyCommandPhase extends FieldPhase {
     super.start();
 
     const enemyPokemon = this.scene.getEnemyField()[this.fieldIndex];
-
     const battle = this.scene.currentBattle;
-
     const trainer = battle.trainer;
 
     if (battle.double && enemyPokemon.hasAbility(Abilities.COMMANDER)
@@ -41,15 +39,6 @@ export class EnemyCommandPhase extends FieldPhase {
       this.skipTurn = true;
     }
 
-    /**
-       * If the enemy has a trainer, decide whether or not the enemy should switch
-       * to another member in its party.
-       *
-       * This block compares the active enemy Pokemon's {@linkcode Pokemon.getMatchupScore | matchup score}
-       * against the active player Pokemon with the enemy party's other non-fainted Pokemon. If a party
-       * member's matchup score is 3x the active enemy's score (or 2x for "boss" trainers),
-       * the enemy will switch to that Pokemon.
-       */
     if (trainer && !enemyPokemon.getMoveQueue().length) {
       const opponents = enemyPokemon.getOpponents();
 
@@ -78,7 +67,6 @@ export class EnemyCommandPhase extends FieldPhase {
       }
     }
 
-    /** Select a move to use (and a target to use it against, if applicable) */
     const nextMove = enemyPokemon.getNextMove();
 
     this.scene.currentBattle.turnCommands[this.fieldIndex + BattlerIndex.ENEMY] =
@@ -91,5 +79,25 @@ export class EnemyCommandPhase extends FieldPhase {
 
   getFieldIndex(): number {
     return this.fieldIndex;
+  }
+
+  override end() {
+    // 적 명령 정보를 가져옴 (null일 경우 기본 값 제공)
+    const command = this.scene.currentBattle.turnCommands[this.fieldIndex + BattlerIndex.ENEMY] ?? { command: null };
+
+    // 결과 객체 생성
+    const result = {
+      phase: "Enemy Command Phase",
+      fieldIndex: this.fieldIndex,
+      command: command.command === Command.POKEMON ? "Switch" : command.command === Command.FIGHT ? "Fight" : "None",
+      details: command.command === Command.POKEMON
+        ? { switchTo: command.cursor }
+        : command.command === Command.FIGHT
+          ? { move: command.move, skipTurn: command.skip }
+          : null
+    };
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+    super.end();
   }
 }

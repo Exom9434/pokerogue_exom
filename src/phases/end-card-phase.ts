@@ -37,4 +37,15 @@ export class EndCardPhase extends Phase {
       }, null, true);
     });
   }
+  end() {
+    // 결과 객체 생성
+    const result = {
+      phase: "End Card Phase",
+      message: i18next.t("battle:congratulations"),
+      gender: this.scene.gameData.gender === PlayerGender.FEMALE ? "Female" : "Male"
+    };
+    // 결과 출력
+    console.log(JSON.stringify(result, null, 2));
+    super.end();
+  }
 }
