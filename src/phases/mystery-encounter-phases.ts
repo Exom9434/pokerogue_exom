@@ -613,4 +613,23 @@ export class PostMysteryEncounterPhase extends Phase {
       endPhase();
     }
   }
+  /**
+ * Phase 종료 시 결과를 JSON 형식으로 콘솔에 출력
+ */
+  end() {
+    const result = this.getResult();
+    console.log(JSON.stringify(result, null, 2)); // JSON 형식으로 출력
+    super.end(); // 부모 클래스의 end 호출
+  }
+
+  /**
+   * 결과를 재정의 가능
+   */
+  getResult(): object {
+    return {
+      phase: this.constructor.name, // 현재 phase 이름
+      status: "completed",
+      timestamp: new Date().toISOString() // 종료 시점 타임스탬프 추가
+    };
+  }
 }

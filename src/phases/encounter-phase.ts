@@ -442,14 +442,17 @@ export class EncounterPhase extends BattlePhase {
   }
 
   end() {
+    // Log the result as a JSON string before executing the rest of the method
+    console.log(JSON.stringify(this.getResult(), null, 2));
     const enemyField = this.scene.getEnemyField();
-
     enemyField.forEach((enemyPokemon, e) => {
       if (enemyPokemon.isShiny()) {
         this.scene.unshiftPhase(new ShinySparklePhase(this.scene, BattlerIndex.ENEMY + e));
       }
-      /** This sets Eternatus' held item to be untransferrable, preventing it from being stolen  */
-      if (enemyPokemon.species.speciesId === Species.ETERNATUS && (this.scene.gameMode.isBattleClassicFinalBoss(this.scene.currentBattle.waveIndex) || this.scene.gameMode.isEndlessMajorBoss(this.scene.currentBattle.waveIndex))) {
+      /** This sets Eternatus' held item to be untransferrable, preventing it from being stolen */
+      if (enemyPokemon.species.speciesId === Species.ETERNATUS &&
+          (this.scene.gameMode.isBattleClassicFinalBoss(this.scene.currentBattle.waveIndex) ||
+           this.scene.gameMode.isEndlessMajorBoss(this.scene.currentBattle.waveIndex))) {
         const enemyMBH = this.scene.findModifier(m => m instanceof TurnHeldItemTransferModifier, false) as TurnHeldItemTransferModifier;
         if (enemyMBH) {
           this.scene.removeModifier(enemyMBH, true);
@@ -458,18 +461,13 @@ export class EncounterPhase extends BattlePhase {
         }
       }
     });
-
     if (![ BattleType.TRAINER, BattleType.MYSTERY_ENCOUNTER ].includes(this.scene.currentBattle.battleType)) {
       enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
-        // if there is not a player party, we can't continue
         if (!this.scene.getPlayerParty().length) {
           return false;
         }
-        // how many player pokemon are on the field ?
         const pokemonsOnFieldCount = this.scene.getPlayerParty().filter(p => p.isOnField()).length;
-        // if it's a 2vs1, there will never be a 2nd pokemon on our field even
-        const requiredPokemonsOnField = Math.min(this.scene.getPlayerParty().filter((p) => !p.isFainted()).length, 2);
-        // if it's a double, there should be 2, otherwise 1
+        const requiredPokemonsOnField = Math.min(this.scene.getPlayerParty().filter(p => !p.isFainted()).length, 2);
         if (this.scene.currentBattle.double) {
           return pokemonsOnFieldCount === requiredPokemonsOnField;
         }
@@ -480,14 +478,11 @@ export class EncounterPhase extends BattlePhase {
         enemyField.map(p => this.scene.pushPhase(new ScanIvsPhase(this.scene, p.getBattlerIndex(), Math.min(ivScannerModifier.getStackCount() * 2, 6))));
       }
     }
-
     if (!this.loaded) {
       const availablePartyMembers = this.scene.getPokemonAllowedInBattle();
-
       if (!availablePartyMembers[0].isOnField()) {
         this.scene.pushPhase(new SummonPhase(this.scene, 0));
       }
-
       if (this.scene.currentBattle.double) {
         if (availablePartyMembers.length > 1) {
           this.scene.pushPhase(new ToggleDoublePositionPhase(this.scene, true));
@@ -501,8 +496,8 @@ export class EncounterPhase extends BattlePhase {
         }
         this.scene.pushPhase(new ToggleDoublePositionPhase(this.scene, false));
       }
-
-      if (this.scene.currentBattle.battleType !== BattleType.TRAINER && (this.scene.currentBattle.waveIndex > 1 || !this.scene.gameMode.isDaily)) {
+      if (this.scene.currentBattle.battleType !== BattleType.TRAINER &&
+          (this.scene.currentBattle.waveIndex > 1 || !this.scene.gameMode.isDaily)) {
         const minPartySize = this.scene.currentBattle.double ? 2 : 1;
         if (availablePartyMembers.length > minPartySize) {
           this.scene.pushPhase(new CheckSwitchPhase(this.scene, 0, this.scene.currentBattle.double));
@@ -513,6 +508,24 @@ export class EncounterPhase extends BattlePhase {
       }
     }
     handleTutorial(this.scene, Tutorial.Access_Menu).then(() => super.end());
+  }
+
+  getResult(): object {
+    const battle = this.scene.currentBattle;
+    const enemyParty = battle.enemyParty.map(enemy => ({
+      name: enemy.getNameToRender(),
+      speciesId: enemy.species.speciesId,
+      stats: enemy.stats,
+      ability: enemy.getAbility().name
+    }));
+
+    return {
+      phase: "Encounter Phase",
+      waveIndex: battle.waveIndex,
+      enemyCount: enemyParty.length,
+      enemyParty,
+      isMysteryEncounter: battle.isBattleMysteryEncounter()
+    };
   }
 
   tryOverrideForBattleSpec(): boolean {

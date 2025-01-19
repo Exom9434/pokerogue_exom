@@ -252,7 +252,20 @@ export class SummonPhase extends PartyMemberPokemonPhase {
 
   end() {
     this.onEnd();
-
+    console.log(JSON.stringify(this.getResult(), null, 2));
     super.end();
+  }
+  /**
+   * SummonMissingPhase의 결과를 반환.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "SummonMissingPhase",
+      fieldIndex: this.fieldIndex,
+      pokemon: getPokemonNameWithAffix(pokemon),
+      isSummoned: pokemon.isOnField(),
+      status: "completed",
+    };
   }
 }

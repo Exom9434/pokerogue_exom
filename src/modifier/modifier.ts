@@ -159,6 +159,10 @@ export abstract class Modifier {
    * @param args collection of all passed parameters
    */
   abstract apply(...args: unknown[]): boolean | Promise<boolean>;
+
+  getType(): ModifierType {
+    return this.type;
+  }
 }
 
 export abstract class PersistentModifier extends Modifier {

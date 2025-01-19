@@ -563,4 +563,19 @@ export class EvolutionPhase extends Phase {
 
     updateParticle();
   }
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result as JSON
+    super.end(); // Call the parent class's end method to ensure phase shifting
+  }
+
+  getResult(): object {
+    return {
+      phase: "Evolution Phase",
+      pokemon: this.pokemon.name,
+      preEvolvedName: this.preEvolvedPokemonName,
+      evolved: !!this.evolution,
+      evolutionType: this.fusionSpeciesEvolved ? "Fusion" : "Standard",
+      status: this.evolutionHandler.cancelled ? "failed" : "successful"
+    };
+  }
 }

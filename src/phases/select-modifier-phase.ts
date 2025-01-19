@@ -305,4 +305,29 @@ export class SelectModifierPhase extends BattlePhase {
   addModifier(modifier: Modifier): Promise<boolean> {
     return this.scene.addModifier(modifier, false, true);
   }
+  /**
+ * Logs the result when the phase ends.
+ */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "SelectModifierPhase",
+      status: "completed",
+      rerollCount: this.rerollCount,
+      modifierTiers: this.modifierTiers
+        ? this.modifierTiers.map(t => ModifierTier[t])
+        : "None",
+      selectedOptions: this.typeOptions.map(option => ({
+        type: option.type?.name || "Unknown",
+        tier: option.type?.tier !== undefined ? ModifierTier[option.type.tier] : "Unknown",
+      })),
+    };
+  }
 }

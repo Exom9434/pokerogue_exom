@@ -8,8 +8,7 @@ export class PostGameOverPhase extends Phase {
 
   constructor(scene: BattleScene, endCardPhase?: EndCardPhase) {
     super(scene);
-
-    this.endCardPhase = endCardPhase!; // TODO: is this bang correct?
+    this.endCardPhase = endCardPhase ?? null;
   }
 
   start() {
@@ -42,5 +41,24 @@ export class PostGameOverPhase extends Phase {
     } else {
       saveAndReset();
     }
+  }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2));
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "PostGameOverPhase",
+      status: "completed",
+      hasEndCardPhase: !!this.endCardPhase,
+    };
   }
 }

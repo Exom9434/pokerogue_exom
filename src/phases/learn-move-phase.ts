@@ -25,8 +25,9 @@ export enum LearnMoveType {
 export class LearnMovePhase extends PlayerPartyMemberPokemonPhase {
   private moveId: Moves;
   private messageMode: Mode;
-  private learnMoveType;
+  private learnMoveType: LearnMoveType;
   private cost: number;
+  private moveLearned: boolean = false; // Track if the move was learned
 
   constructor(scene: BattleScene, partyMemberIndex: integer, moveId: Moves, learnMoveType: LearnMoveType = LearnMoveType.LEARN_MOVE, cost: number = -1) {
     super(scene, partyMemberIndex);
@@ -149,6 +150,9 @@ export class LearnMovePhase extends PlayerPartyMemberPokemonPhase {
    * @param Pokemon The Pokemon learning the move
    */
   async learnMove(index: number, move: Move, pokemon: Pokemon, textMessage?: string) {
+    // Track that the move was successfully learned
+    this.moveLearned = true;
+    // Existing logic for learning a move
     if (this.learnMoveType === LearnMoveType.TM) {
       if (!pokemon.usedTMs) {
         pokemon.usedTMs = [];
@@ -181,5 +185,22 @@ export class LearnMovePhase extends PlayerPartyMemberPokemonPhase {
       this.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeMoveLearnedTrigger, true);
       this.end();
     }, this.messageMode === Mode.EVOLUTION_SCENE ? 1000 : undefined, true);
+  }
+
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "Learn Move Phase",
+      status: this.moveLearned ? "Move Learned" : "Move Not Learned",
+      pokemon: pokemon ? getPokemonNameWithAffix(pokemon) : "Unknown",
+      move: allMoves[this.moveId].name,
+      learnMoveType: LearnMoveType[this.learnMoveType],
+      cost: this.cost,
+    };
+  }
+
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result in JSON format
+    super.end();
   }
 }

@@ -273,7 +273,7 @@ export class GameOverPhase extends BattlePhase {
       })),
       score: this.scene.score,
       money: this.scene.money,
-      modifiers: this.scene.findModifiers(() => true).map(modifier => modifier.getName())
+      modifiers: this.scene.findModifiers(() => true).map(modifier => modifier.getType())
     };
 
     // 결과 출력

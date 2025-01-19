@@ -35,4 +35,30 @@ export class PostSummonPhase extends PokemonPhase {
         this.end();
       });
   }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2));
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "PostSummonPhase",
+      status: "completed",
+      pokemon: {
+        name: pokemon.getName(),
+        hp: pokemon.hp,
+        maxHp: pokemon.getMaxHp(),
+        isToxic: pokemon.status?.effect === StatusEffect.TOXIC,
+      },
+      isMysteryEncounter: this.scene.currentBattle.isBattleMysteryEncounter(),
+    };
+  }
 }

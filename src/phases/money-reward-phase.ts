@@ -7,6 +7,7 @@ import { BattlePhase } from "./battle-phase";
 
 export class MoneyRewardPhase extends BattlePhase {
   private moneyMultiplier: number;
+  private rewardedMoney: number | null = null; // 로깅용 보상 금액 저장
 
   constructor(scene: BattleScene, moneyMultiplier: number) {
     super(scene);
@@ -24,11 +25,29 @@ export class MoneyRewardPhase extends BattlePhase {
     }
 
     this.scene.addMoney(moneyAmount.value);
+    this.rewardedMoney = moneyAmount.value; // 보상 금액 저장
 
     const userLocale = navigator.language || "en-US";
     const formattedMoneyAmount = moneyAmount.value.toLocaleString(userLocale);
     const message = i18next.t("battle:moneyWon", { moneyAmount: formattedMoneyAmount });
 
     this.scene.ui.showText(message, null, () => this.end(), null, true);
+  }
+
+  end() {
+    // 결과 로깅
+    console.log(
+      JSON.stringify(
+        {
+          phase: "MoneyRewardPhase",
+          status: "completed",
+          rewardedMoney: this.rewardedMoney,
+        },
+        null,
+        2
+      )
+    );
+
+    super.end();
   }
 }

@@ -1,3 +1,4 @@
+///손 안댐
 import BattleScene from "#app/battle-scene";
 import { SpeciesFormChangeActiveTrigger } from "#app/data/pokemon-forms";
 import { SwitchType } from "#enums/switch-type";

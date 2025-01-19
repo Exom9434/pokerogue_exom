@@ -28,4 +28,21 @@ export class PartyExpPhase extends Phase {
 
     this.end();
   }
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2));
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "PartyExpPhase",
+      status: "completed",
+      expValue: this.expValue,
+      useWaveIndexMultiplier: this.useWaveIndexMultiplier ?? false,
+      pokemonParticipantIds: this.pokemonParticipantIds ? Array.from(this.pokemonParticipantIds) : null,
+    };
+  }
 }

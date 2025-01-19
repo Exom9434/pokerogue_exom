@@ -21,4 +21,26 @@ export class ShowTrainerPhase extends BattlePhase {
       onComplete: () => this.end()
     });
   }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "ShowTrainerPhase",
+      status: "completed",
+      trainerVisible: this.scene.trainer.visible,
+      trainerTexture: this.scene.trainer.texture.key,
+      trainerPositionX: this.scene.trainer.x,
+      playerGender: this.scene.gameData.gender === PlayerGender.FEMALE ? "Female" : "Male"
+    };
+  }
 }

@@ -395,6 +395,19 @@ export class MoveEffectPhase extends PokemonPhase {
 
   public override end(): void {
     const user = this.getUserPokemon();
+    const phaseResult = {
+      phase: "MoveEffectPhase",
+      user: user ? user.getName() : "Unknown",
+      move: this.move.getMove().name,
+      targets: this.targets.map(targetIndex => ({
+        index: targetIndex,
+        name: this.scene.getPokemonById(targetIndex)?.getName() ?? "Unknown",
+      })),
+      hitsLeft: user?.turnData.hitsLeft ?? 0,
+      hitCount: user?.turnData.hitCount ?? 0,
+    };
+    // 콘솔에 Phase 결과를 JSON 형태로 기록
+    console.log(JSON.stringify(phaseResult, null, 2));
     /**
      * If this phase isn't for the invoked move's last strike,
      * unshift another MoveEffectPhase for the next strike.

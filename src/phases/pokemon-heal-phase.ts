@@ -113,7 +113,36 @@ export class PokemonHealPhase extends CommonAnimPhase {
     }
 
     if (!healOrDamage && !lastStatusEffect) {
+      console.log(JSON.stringify(this.getResult(), null, 2));
       super.end();
     }
+  }
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "PokemonHealPhase",
+      status: "completed",
+      pokemon: {
+        name: pokemon.getName(),
+        hp: pokemon.hp,
+        maxHp: pokemon.getMaxHp(),
+        isFullHp: pokemon.isFullHp(),
+        status: pokemon.status ? pokemon.status.effect : "Healthy",
+        moves: pokemon.getMoveset().map((move) => ({
+          name: move!.getMove(),
+          ppUsed: move!.ppUsed,
+          maxPP: move!.getMovePp(),
+        })),
+      },
+      hpHealed: this.hpHealed,
+      message: this.message,
+      revive: this.revive,
+      healStatus: this.healStatus,
+      preventFullHeal: this.preventFullHeal,
+      fullRestorePP: this.fullRestorePP,
+    };
   }
 }

@@ -10,6 +10,8 @@ import * as Utils from "#app/utils";
 import { PokemonPhase } from "./pokemon-phase";
 
 export class PostTurnStatusEffectPhase extends PokemonPhase {
+  private damageDealt: number = 0; // Store damage dealt during the phase
+
   constructor(scene: BattleScene, battlerIndex: BattlerIndex) {
     super(scene, battlerIndex);
   }
@@ -38,7 +40,7 @@ export class PostTurnStatusEffectPhase extends PokemonPhase {
             break;
         }
         if (damage.value) {
-          // Set preventEndure flag to avoid pokemon surviving thanks to focus band, sturdy, endure ...
+          this.damageDealt = damage.value; // Store the damage dealt
           this.scene.damageNumberHandler.add(this.getPokemon(), pokemon.damage(damage.value, false, true));
           pokemon.updateInfo();
           applyPostDamageAbAttrs(PostDamageAbAttr, pokemon, damage.value, pokemon.hasPassive(), false, []);
@@ -52,11 +54,35 @@ export class PostTurnStatusEffectPhase extends PokemonPhase {
     }
   }
 
+  /**
+   * Override end method to log results and call the parent class's end.
+   */
   override end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
     if (this.scene.currentBattle.battleSpec === BattleSpec.FINAL_BOSS) {
       this.scene.initFinalBossPhaseTwo(this.getPokemon());
     } else {
       super.end();
     }
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "PostTurnStatusEffectPhase",
+      status: "completed",
+      pokemon: {
+        name: pokemon.getName(),
+        hp: pokemon.hp,
+        maxHp: pokemon.getMaxHp(),
+        statusEffect: pokemon.status?.effect ?? "None",
+        toxicTurnCount: pokemon.status?.toxicTurnCount ?? 0,
+      },
+      damageDealt: this.damageDealt,
+      isFinalBossPhase: this.scene.currentBattle.battleSpec === BattleSpec.FINAL_BOSS,
+    };
   }
 }

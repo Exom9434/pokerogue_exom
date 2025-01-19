@@ -31,12 +31,35 @@ export class SelectTargetPhase extends PokemonPhase {
         this.scene.currentBattle.turnCommands[this.fieldIndex] = null;
         this.scene.unshiftPhase(new CommandPhase(this.scene, this.fieldIndex));
       } else {
-          turnCommand!.targets = targets; //TODO: is the bang correct here?
+        turnCommand!.targets = targets; //TODO: is the bang correct here?
       }
       if (turnCommand?.command === Command.BALL && this.fieldIndex) {
-          this.scene.currentBattle.turnCommands[this.fieldIndex - 1]!.skip = true; //TODO: is the bang correct here?
+        this.scene.currentBattle.turnCommands[this.fieldIndex - 1]!.skip = true; //TODO: is the bang correct here?
       }
       this.end();
     });
+  }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const turnCommand = this.scene.currentBattle.turnCommands[this.fieldIndex];
+    return {
+      phase: "SelectTargetPhase",
+      status: "completed",
+      fieldIndex: this.fieldIndex,
+      move: turnCommand?.move?.move || "None",
+      command: turnCommand?.command || "None",
+      targets: turnCommand?.targets || [],
+    };
   }
 }
