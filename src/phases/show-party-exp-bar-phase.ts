@@ -36,9 +36,7 @@ export class ShowPartyExpBarPhase extends PlayerPartyMemberPokemonPhase {
     if (this.scene.expParty === ExpNotification.SKIP) {
       this.end();
     } else if (this.scene.expParty === ExpNotification.ONLY_LEVEL_UP) {
-      if (newLevel > lastLevel) { // this means if we level up
-        // instead of displaying the exp gain in the small frame, we display the new level
-        // we use the same method for mode 0 & 1, by giving a parameter saying to display the exp or the level
+      if (newLevel > lastLevel) {
         this.scene.partyExpBar.showPokemonExp(pokemon, exp.value, this.scene.expParty === ExpNotification.ONLY_LEVEL_UP, newLevel).then(() => {
           setTimeout(() => this.end(), 800 / Math.pow(2, this.scene.expGainsSpeed));
         });
@@ -52,6 +50,31 @@ export class ShowPartyExpBarPhase extends PlayerPartyMemberPokemonPhase {
     } else {
       this.end();
     }
+  }
 
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "ShowPartyExpBarPhase",
+      status: "completed",
+      pokemon: pokemon ? pokemon.getName() : "None",
+      expGained: this.expValue,
+      currentExp: pokemon?.exp || 0,
+      level: pokemon?.level || 0,
+      newLevelReached: pokemon?.level > pokemon?.battleData?.level,
+      expNotification: this.scene.expParty,
+      expGainsSpeed: this.scene.expGainsSpeed,
+    };
   }
 }

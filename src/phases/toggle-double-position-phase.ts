@@ -7,7 +7,6 @@ export class ToggleDoublePositionPhase extends BattlePhase {
 
   constructor(scene: BattleScene, double: boolean) {
     super(scene);
-
     this.double = double;
   }
 
@@ -16,16 +15,37 @@ export class ToggleDoublePositionPhase extends BattlePhase {
 
     const playerPokemon = this.scene.getPlayerField().find(p => p.isActive(true));
     if (playerPokemon) {
-      playerPokemon.setFieldPosition(this.double && this.scene.getPokemonAllowedInBattle().length > 1 ? FieldPosition.LEFT : FieldPosition.CENTER, 500).then(() => {
-        if (playerPokemon.getFieldIndex() === 1) {
-          const party = this.scene.getPlayerParty();
-          party[1] = party[0];
-          party[0] = playerPokemon;
-        }
-        this.end();
-      });
+      playerPokemon
+        .setFieldPosition(
+          this.double && this.scene.getPokemonAllowedInBattle().length > 1 ? FieldPosition.LEFT : FieldPosition.CENTER,
+          500
+        )
+        .then(() => {
+          if (playerPokemon.getFieldIndex() === 1) {
+            const party = this.scene.getPlayerParty();
+            party[1] = party[0];
+            party[0] = playerPokemon;
+          }
+          this.end();
+        });
     } else {
       this.end();
     }
+  }
+
+  getResult(): object {
+    const playerPokemon = this.scene.getPlayerField().find(p => p.isActive(true));
+    return {
+      phase: "ToggleDoublePositionPhase",
+      doubleBattleEnabled: this.double,
+      activePokemon: playerPokemon ? playerPokemon.getNameToRender() : null,
+      fieldPosition: playerPokemon ? playerPokemon.fieldPosition : null,
+      status: "completed",
+    };
+  }
+
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the phase result
+    super.end();
   }
 }

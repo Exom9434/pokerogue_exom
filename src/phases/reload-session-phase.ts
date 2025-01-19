@@ -8,7 +8,6 @@ export class ReloadSessionPhase extends Phase {
 
   constructor(scene: BattleScene, systemDataStr?: string) {
     super(scene);
-
     this.systemDataStr = systemDataStr ?? null;
   }
 
@@ -35,5 +34,25 @@ export class ReloadSessionPhase extends Phase {
         loaded = true;
       }
     });
+  }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "ReloadSessionPhase",
+      status: "completed",
+      systemDataStr: this.systemDataStr ?? "Default system data",
+      reloadMode: Mode.SESSION_RELOAD,
+    };
   }
 }

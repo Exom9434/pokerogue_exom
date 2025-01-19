@@ -1,5 +1,13 @@
 import BattleScene from "#app/battle-scene";
-import { applyPreWeatherEffectAbAttrs, SuppressWeatherEffectAbAttr, PreWeatherDamageAbAttr, applyAbAttrs, BlockNonDirectDamageAbAttr, applyPostWeatherLapseAbAttrs, PostWeatherLapseAbAttr } from "#app/data/ability";
+import {
+  applyPreWeatherEffectAbAttrs,
+  SuppressWeatherEffectAbAttr,
+  PreWeatherDamageAbAttr,
+  applyAbAttrs,
+  BlockNonDirectDamageAbAttr,
+  applyPostWeatherLapseAbAttrs,
+  PostWeatherLapseAbAttr,
+} from "#app/data/ability";
 import { CommonAnim } from "#app/data/battle-anims";
 import { Weather, getWeatherDamageMessage, getWeatherLapseMessage } from "#app/data/weather";
 import { BattlerTagType } from "#app/enums/battler-tag-type";
@@ -10,6 +18,7 @@ import { CommonAnimPhase } from "./common-anim-phase";
 
 export class WeatherEffectPhase extends CommonAnimPhase {
   public weather: Weather | null;
+  private phaseDetails: { pokemon: string; damage: number }[] = [];
 
   constructor(scene: BattleScene) {
     super(scene, undefined, undefined, CommonAnim.SUNNY + ((scene?.arena?.weather?.weatherType || WeatherType.NONE) - 1));
@@ -28,10 +37,11 @@ export class WeatherEffectPhase extends CommonAnimPhase {
     this.setAnimation(CommonAnim.SUNNY + (this.weather.weatherType - 1));
 
     if (this.weather.isDamaging()) {
-
       const cancelled = new Utils.BooleanHolder(false);
 
-      this.executeForAll((pokemon: Pokemon) => applyPreWeatherEffectAbAttrs(SuppressWeatherEffectAbAttr, pokemon, this.weather, cancelled));
+      this.executeForAll((pokemon: Pokemon) =>
+        applyPreWeatherEffectAbAttrs(SuppressWeatherEffectAbAttr, pokemon, this.weather, cancelled)
+      );
 
       if (!cancelled.value) {
         const inflictDamage = (pokemon: Pokemon) => {
@@ -40,18 +50,27 @@ export class WeatherEffectPhase extends CommonAnimPhase {
           applyPreWeatherEffectAbAttrs(PreWeatherDamageAbAttr, pokemon, this.weather, cancelled);
           applyAbAttrs(BlockNonDirectDamageAbAttr, pokemon, cancelled);
 
-          if (cancelled.value || pokemon.getTag(BattlerTagType.UNDERGROUND) || pokemon.getTag(BattlerTagType.UNDERWATER)) {
+          if (
+            cancelled.value ||
+            pokemon.getTag(BattlerTagType.UNDERGROUND) ||
+            pokemon.getTag(BattlerTagType.UNDERWATER)
+          ) {
             return;
           }
 
           const damage = Utils.toDmgValue(pokemon.getMaxHp() / 16);
-
-          this.scene.queueMessage(getWeatherDamageMessage(this.weather?.weatherType!, pokemon)!); // TODO: are those bangs correct?
+          this.scene.queueMessage(getWeatherDamageMessage(this.weather?.weatherType!, pokemon)!);
           pokemon.damageAndUpdate(damage, HitResult.EFFECTIVE, false, false, true);
+
+          // Log damage details
+          this.phaseDetails.push({ pokemon: pokemon.name, damage });
         };
 
         this.executeForAll((pokemon: Pokemon) => {
-          const immune = !pokemon || !!pokemon.getTypes(true, true).filter(t => this.weather?.isTypeDamageImmune(t)).length || pokemon.switchOutStatus;
+          const immune =
+            !pokemon ||
+            !!pokemon.getTypes(true, true).filter((t) => this.weather?.isTypeDamageImmune(t)).length ||
+            pokemon.switchOutStatus;
           if (!immune) {
             inflictDamage(pokemon);
           }
@@ -68,5 +87,19 @@ export class WeatherEffectPhase extends CommonAnimPhase {
 
       super.start();
     });
+  }
+
+  getResult(): object {
+    return {
+      phase: "WeatherEffectPhase",
+      weather: this.weather?.weatherType || "None",
+      details: this.phaseDetails,
+      status: "completed",
+    };
+  }
+
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the phase result
+    super.end();
   }
 }

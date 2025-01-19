@@ -49,18 +49,23 @@ export class LevelUpPhase extends PlayerPartyMemberPokemonPhase {
   }
 
   public override end() {
-    if (this.lastLevel < 100) { // this feels like an unnecessary optimization
+    console.log(`[LevelUpPhase] Ending level-up process for ${this.pokemon.getName()} at level ${this.level}`);
+
+    if (this.lastLevel < 100) {
       const levelMoves = this.getPokemon().getLevelMoves(this.lastLevel + 1);
       for (const lm of levelMoves) {
+        console.log(`[LevelUpPhase] ${this.pokemon.getName()} can learn a new move: ${lm[1]}`);
         this.scene.unshiftPhase(new LearnMovePhase(this.scene, this.partyMemberIndex, lm[1]));
       }
     }
     if (!this.pokemon.pauseEvolutions) {
       const evolution = this.pokemon.getEvolution();
       if (evolution) {
+        console.log(`[LevelUpPhase] ${this.pokemon.getName()} is eligible for evolution to ${evolution}`);
         this.scene.unshiftPhase(new EvolutionPhase(this.scene, this.pokemon, evolution, this.lastLevel));
       }
     }
+    console.log(`[LevelUpPhase] Finalizing level-up for ${this.pokemon.getName()}`);
     return super.end();
   }
 }

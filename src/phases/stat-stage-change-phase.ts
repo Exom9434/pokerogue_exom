@@ -248,4 +248,29 @@ export class StatStageChangePhase extends PokemonPhase {
 
     return messages;
   }
+  end(): void {
+    // 결과 로그 추가
+    console.log(JSON.stringify(this.getResult(), null, 2));
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    const statsChanged = this.stats.map(stat => ({
+      stat: Stat[stat],
+      currentStage: pokemon.getStatStage(stat),
+    }));
+    return {
+      phase: "StatStageChangePhase",
+      battlerIndex: this.battlerIndex,
+      pokemon: getPokemonNameWithAffix(pokemon),
+      statsChanged,
+      stagesApplied: this.stages,
+      selfTarget: this.selfTarget,
+      status: "completed",
+    };
+  }
 }

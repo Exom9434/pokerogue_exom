@@ -26,4 +26,27 @@ export class ShowAbilityPhase extends PokemonPhase {
 
     this.end();
   }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: "ShowAbilityPhase",
+      status: "completed",
+      pokemon: pokemon ? pokemon.getName() : "None",
+      ability: pokemon?.getAbility()?.name || "Unknown",
+      passive: this.passive,
+      abilityRevealed: pokemon?.battleData?.abilityRevealed || false,
+    };
+  }
 }

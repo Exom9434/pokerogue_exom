@@ -30,7 +30,6 @@ export class TitlePhase extends Phase {
 
   constructor(scene: BattleScene) {
     super(scene);
-
     this.loaded = false;
   }
 
@@ -259,7 +258,20 @@ export class TitlePhase extends Phase {
     });
   }
 
+  getResult(): object {
+    return {
+      phase: "TitlePhase",
+      loaded: this.loaded,
+      lastSessionSlot: loggedInUser?.lastSessionSlot ?? -1,
+      gameMode: this.gameMode ? GameMode.getModeName(this.gameMode) : "None",
+      status: "completed"
+    };
+  }
+
   end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+
     if (!this.loaded && !this.scene.gameMode.isDaily) {
       this.scene.arena.preloadBgm();
       this.scene.gameMode = getGameMode(this.gameMode);
@@ -299,7 +311,6 @@ export class TitlePhase extends Phase {
         this.scene.validateVoucher(vouchers[achv]);
       }
     }
-
-    super.end();
   }
+
 }

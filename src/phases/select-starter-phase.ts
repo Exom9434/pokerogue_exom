@@ -101,11 +101,36 @@ export class SelectStarterPhase extends Phase {
       this.scene.arena.init();
       this.scene.sessionPlayTime = 0;
       this.scene.lastSavePlayTime = 0;
-      // Ensures Keldeo (or any future Pokemon that have this type of form change) starts in the correct form
       this.scene.getPlayerParty().forEach((p) => {
         this.scene.triggerPokemonFormChange(p, SpeciesFormChangeMoveLearnedTrigger);
       });
       this.end();
     });
+  }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "SelectStarterPhase",
+      status: "completed",
+      selectedSlot: this.scene.sessionSlotId || "None",
+      starters: this.scene.getPlayerParty().map(p => ({
+        species: p.species.speciesId,
+        level: p.level,
+        shiny: p.shiny,
+        gender: p.gender,
+        nickname: p.nickname || "None"
+      })),
+    };
   }
 }

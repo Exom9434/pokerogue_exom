@@ -391,6 +391,23 @@ export class MovePhase extends BattlePhase {
    * then ends the phase.
    */
   public end(): void {
+    // Phase 결과 객체 생성
+    const phaseResult = {
+      phase: "MovePhase",
+      status: this.failed ? "failed" : this.cancelled ? "cancelled" : "completed",
+      pokemon: this.pokemon.getName(),
+      move: this.move.getMove().name,
+      targets: this.targets.map(index => this.scene.getField()[index]?.getName() ?? "Unknown"),
+      followUp: this.followUp,
+      ignorePp: this.ignorePp,
+      failed: this.failed,
+      cancelled: this.cancelled,
+    };
+
+    // 콘솔에 Phase 결과를 JSON 형태로 기록
+    console.log(JSON.stringify(phaseResult, null, 2));
+
+    super.end();
     if (!this.followUp && this.canMove()) {
       this.scene.unshiftPhase(new MoveEndPhase(this.scene, this.pokemon.getBattlerIndex()));
     }

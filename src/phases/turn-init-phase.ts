@@ -1,6 +1,9 @@
 import { BattlerIndex } from "#app/battle";
 import BattleScene from "#app/battle-scene";
-import { handleMysteryEncounterBattleStartEffects, handleMysteryEncounterTurnStartEffects } from "#app/data/mystery-encounters/utils/encounter-phase-utils";
+import {
+  handleMysteryEncounterBattleStartEffects,
+  handleMysteryEncounterTurnStartEffects,
+} from "#app/data/mystery-encounters/utils/encounter-phase-utils";
 import { TurnInitEvent } from "#app/events/battle-scene";
 import { PlayerPokemon } from "#app/field/pokemon";
 import i18next from "i18next";
@@ -12,6 +15,9 @@ import { ToggleDoublePositionPhase } from "./toggle-double-position-phase";
 import { TurnStartPhase } from "./turn-start-phase";
 
 export class TurnInitPhase extends FieldPhase {
+  private phaseDetails: { pokemon: string; actions: string[] }[] = [];
+  private skippedDueToEncounterEffects: boolean = false;
+
   constructor(scene: BattleScene) {
     super(scene);
   }
@@ -19,38 +25,47 @@ export class TurnInitPhase extends FieldPhase {
   start() {
     super.start();
 
-    this.scene.getPlayerField().forEach(p => {
-      // If this pokemon is in play and evolved into something illegal under the current challenge, force a switch
+    this.scene.getPlayerField().forEach((p) => {
+      const pokemonName = p.name;
+      const actions: string[] = [];
+
       if (p.isOnField() && !p.isAllowedInBattle()) {
-        this.scene.queueMessage(i18next.t("challenges:illegalEvolution", { "pokemon": p.name }), null, true);
+        actions.push("Illegal evolution detected");
+        this.scene.queueMessage(i18next.t("challenges:illegalEvolution", { pokemon: p.name }), null, true);
 
         const allowedPokemon = this.scene.getPokemonAllowedInBattle();
 
         if (!allowedPokemon.length) {
-          // If there are no longer any legal pokemon in the party, game over.
+          actions.push("No legal Pokémon left, game over");
           this.scene.clearPhaseQueue();
           this.scene.unshiftPhase(new GameOverPhase(this.scene));
-        } else if (allowedPokemon.length >= this.scene.currentBattle.getBattlerCount() || (this.scene.currentBattle.double && !allowedPokemon[0].isActive(true))) {
-          // If there is at least one pokemon in the back that is legal to switch in, force a switch.
+        } else if (
+          allowedPokemon.length >= this.scene.currentBattle.getBattlerCount() ||
+          (this.scene.currentBattle.double && !allowedPokemon[0].isActive(true))
+        ) {
+          actions.push("Forcing a switch");
           p.switchOut();
         } else {
-          // If there are no pokemon in the back but we're not game overing, just hide the pokemon.
-          // This should only happen in double battles.
+          actions.push("Hiding Pokémon");
           p.leaveField();
         }
+
         if (allowedPokemon.length === 1 && this.scene.currentBattle.double) {
+          actions.push("Adjusting double position");
           this.scene.unshiftPhase(new ToggleDoublePositionPhase(this.scene, true));
         }
       }
+
+      if (actions.length) {
+        this.phaseDetails.push({ pokemon: pokemonName, actions });
+      }
     });
 
-    //this.scene.pushPhase(new MoveAnimTestPhase(this.scene));
     this.scene.eventTarget.dispatchEvent(new TurnInitEvent());
-
     handleMysteryEncounterBattleStartEffects(this.scene);
 
-    // If true, will skip remainder of current phase (and not queue CommandPhases etc.)
     if (handleMysteryEncounterTurnStartEffects(this.scene)) {
+      this.skippedDueToEncounterEffects = true;
       this.end();
       return;
     }
@@ -62,13 +77,29 @@ export class TurnInitPhase extends FieldPhase {
         }
 
         pokemon.resetTurnData();
-
-        this.scene.pushPhase(pokemon.isPlayer() ? new CommandPhase(this.scene, i) : new EnemyCommandPhase(this.scene, i - BattlerIndex.ENEMY));
+        this.scene.pushPhase(
+          pokemon.isPlayer() ? new CommandPhase(this.scene, i) : new EnemyCommandPhase(this.scene, i - BattlerIndex.ENEMY)
+        );
       }
     });
 
     this.scene.pushPhase(new TurnStartPhase(this.scene));
 
     this.end();
+  }
+
+  getResult(): object {
+    return {
+      phase: "TurnInitPhase",
+      skippedDueToEncounterEffects: this.skippedDueToEncounterEffects,
+      phaseDetails: this.phaseDetails,
+      activeParticipants: this.scene.currentBattle.playerParticipantIds,
+      status: "completed",
+    };
+  }
+
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the phase result
+    super.end();
   }
 }

@@ -10,6 +10,8 @@ import { PartyHealPhase } from "./party-heal-phase";
 import { SwitchBiomePhase } from "./switch-biome-phase";
 
 export class SelectBiomePhase extends BattlePhase {
+  private selectedBiome: Biome | null = null;
+
   constructor(scene: BattleScene) {
     super(scene);
   }
@@ -20,6 +22,7 @@ export class SelectBiomePhase extends BattlePhase {
     const currentBiome = this.scene.arena.biomeType;
 
     const setNextBiome = (nextBiome: Biome) => {
+      this.selectedBiome = nextBiome; // Store the selected biome
       if (this.scene.currentBattle.waveIndex % 10 === 1) {
         this.scene.applyModifiers(MoneyInterestModifier, true, this.scene);
         this.scene.unshiftPhase(new PartyHealPhase(this.scene, false));
@@ -80,5 +83,27 @@ export class SelectBiomePhase extends BattlePhase {
       return Biome.END;
     }
     return this.scene.generateRandomBiome(this.scene.currentBattle.waveIndex);
+  }
+
+  /**
+   * Logs the result when the phase ends.
+   */
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "SelectBiomePhase",
+      status: "completed",
+      currentWave: this.scene.currentBattle.waveIndex,
+      currentBiome: getBiomeName(this.scene.arena.biomeType),
+      selectedBiome: this.selectedBiome ? getBiomeName(this.selectedBiome) : "None",
+      isFinalWave: this.scene.gameMode.isWaveFinal(this.scene.currentBattle.waveIndex),
+    };
   }
 }

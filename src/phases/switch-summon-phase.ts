@@ -32,11 +32,11 @@ export class SwitchSummonPhase extends SummonPhase {
      */
   constructor(scene: BattleScene, switchType: SwitchType, fieldIndex: integer, slotIndex: integer, doReturn: boolean, player?: boolean) {
     super(scene, fieldIndex, player !== undefined ? player : true);
-
     this.switchType = switchType;
     this.slotIndex = slotIndex;
     this.doReturn = doReturn;
   }
+
 
   start(): void {
     super.start();
@@ -156,6 +156,7 @@ export class SwitchSummonPhase extends SummonPhase {
     }
   }
 
+
   onEnd(): void {
     super.onEnd();
 
@@ -168,8 +169,6 @@ export class SwitchSummonPhase extends SummonPhase {
     const lastPokemonIsForceSwitchedAndNotFainted = lastUsedMove?.hasAttr(ForceSwitchOutAttr) && !this.lastPokemon.isFainted();
     const lastPokemonHasForceSwitchAbAttr = this.lastPokemon.hasAbilityWithAttr(PostDamageForceSwitchAbAttr) && !this.lastPokemon.isFainted();
 
-    // Compensate for turn spent summoning
-    // Or compensate for force switch move if switched out pokemon is not fainted
     if (currentCommand === Command.POKEMON || lastPokemonIsForceSwitchedAndNotFainted || lastPokemonHasForceSwitchAbAttr) {
       pokemon.battleSummonData.turnCount--;
       pokemon.battleSummonData.waveTurnCount--;
@@ -192,8 +191,24 @@ export class SwitchSummonPhase extends SummonPhase {
     this.lastPokemon?.resetSummonData();
 
     this.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeActiveTrigger, true);
-    // Reverts to weather-based forms when weather suppressors (Cloud Nine/Air Lock) are switched out
     this.scene.arena.triggerWeatherBasedFormChanges();
+  }
+
+  getResult(): object {
+    return {
+      phase: "SwitchSummonPhase",
+      switchType: this.switchType,
+      slotIndex: this.slotIndex,
+      fieldIndex: this.fieldIndex,
+      lastPokemon: this.lastPokemon ? getPokemonNameWithAffix(this.lastPokemon) : null,
+      currentPokemon: this.getPokemon() ? getPokemonNameWithAffix(this.getPokemon()) : null,
+      status: "completed",
+    };
+  }
+
+  end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
+    super.end();
   }
 
   queuePostSummon(): void {

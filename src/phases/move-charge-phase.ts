@@ -71,6 +71,22 @@ export class MoveChargePhase extends PokemonPhase {
       // Add this move's charging phase to the user's move history
       user.pushMoveHistory({ move: this.move.moveId, targets: [ this.targetIndex ], result: MoveResult.OTHER });
     }
+
+    // 결과 로깅
+    console.log(
+      JSON.stringify(
+        {
+          phase: "MoveChargePhase",
+          status: "completed",
+          userPokemon: user.getName(),
+          moveName: move.name,
+          targetIndex: this.targetIndex,
+        },
+        null,
+        2
+      )
+    );
+
     super.end();
   }
 

@@ -62,4 +62,31 @@ export class SwitchBiomePhase extends BattlePhase {
       }
     });
   }
+  /**
+ * Phase 종료 시 결과를 반환.
+ */
+  getResult(): object {
+    return {
+      phase: "SwitchBiomePhase",
+      nextBiome: this.nextBiome,
+      currentBiome: this.scene.arena.biomeType,
+      status: "completed"
+    };
+  }
+
+  /**
+   * Phase 종료 시 결과를 콘솔에 로깅.
+   */
+  private logResult(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2));
+  }
+
+  /**
+   * Phase 종료 시 호출되는 메서드.
+   */
+  end(): void {
+    this.logResult(); // 결과를 로그
+    super.end();
+  }
 }
+

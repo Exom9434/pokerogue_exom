@@ -215,4 +215,19 @@ export class TurnStartPhase extends FieldPhase {
        */
     this.end();
   }
+
+
+  getResult(): object {
+    return {
+      phase: "TurnStartPhase",
+      turnNumber: this.scene.currentBattle.turn,
+      moveOrder: this.getCommandOrder(),
+      status: "completed",
+    };
+  }
+
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the phase result
+    super.end();
+  }
 }

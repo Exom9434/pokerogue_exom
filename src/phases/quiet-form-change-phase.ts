@@ -71,9 +71,9 @@ export class QuietFormChangePhase extends BattlePhase {
     });
 
     pokemonTintSprite.setAlpha(0);
-    pokemonTintSprite.setTintFill(0xFFFFFF);
+    pokemonTintSprite.setTintFill(0xffffff);
     pokemonFormTintSprite.setVisible(false);
-    pokemonFormTintSprite.setTintFill(0xFFFFFF);
+    pokemonFormTintSprite.setTintFill(0xffffff);
 
     this.scene.playSound("battle_anims/PRSFX- Transform");
 
@@ -128,6 +128,7 @@ export class QuietFormChangePhase extends BattlePhase {
   }
 
   end(): void {
+    console.log(JSON.stringify(this.getResult(), null, 2)); // Log the result
     this.pokemon.findAndRemoveTags(t => t.tagType === BattlerTagType.AUTOTOMIZED);
     if (this.pokemon.scene?.currentBattle.battleSpec === BattleSpec.FINAL_BOSS && this.pokemon instanceof EnemyPokemon) {
       this.scene.playBgm();
@@ -145,5 +146,23 @@ export class QuietFormChangePhase extends BattlePhase {
     }
 
     super.end();
+  }
+
+  /**
+   * Returns the result of this phase.
+   */
+  getResult(): object {
+    return {
+      phase: "QuietFormChangePhase",
+      status: "completed",
+      pokemon: {
+        name: this.pokemon.getName(),
+        form: this.pokemon.formIndex,
+        hp: this.pokemon.hp,
+        maxHp: this.pokemon.getMaxHp(),
+        isFainted: this.pokemon.isFainted()
+      },
+      isFinalBossPhase: this.scene.currentBattle.battleSpec === BattleSpec.FINAL_BOSS
+    };
   }
 }

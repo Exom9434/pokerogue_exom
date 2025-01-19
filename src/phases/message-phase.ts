@@ -35,6 +35,20 @@ export class MessagePhase extends Phase {
   }
 
   end() {
+    // 로깅 추가: phase 종료 시 text와 speaker 정보 출력
+    console.log(
+      JSON.stringify(
+        {
+          phase: "MessagePhase",
+          status: "completed",
+          text: this.text,
+          speaker: this.speaker ?? "No speaker"
+        },
+        null,
+        2
+      )
+    );
+
     if (this.scene.abilityBar.shown) {
       this.scene.abilityBar.hide();
     }
@@ -42,3 +56,4 @@ export class MessagePhase extends Phase {
     super.end();
   }
 }
+

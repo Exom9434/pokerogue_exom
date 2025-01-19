@@ -46,4 +46,37 @@ export class NewBiomeEncounterPhase extends NextEncounterPhase {
   trySetWeatherIfNewBiome(): void {
     this.scene.arena.trySetWeather(getRandomWeatherType(this.scene.arena), false);
   }
+  /**
+ * Override to include logging of results before ending phase.
+ */
+  getResult(): object {
+    const battle = this.scene.currentBattle;
+    const enemyParty = battle.enemyParty.map((enemy) => ({
+      name: enemy.getNameToRender(),
+      speciesId: enemy.species.speciesId,
+      stats: enemy.stats,
+      ability: enemy.getAbility().name,
+      isShiny: enemy.isShiny(),
+    }));
+
+    return {
+      phase: "New Biome Encounter Phase",
+      waveIndex: battle.waveIndex,
+      enemyCount: enemyParty.length,
+      enemyParty,
+      biomeType: this.scene.arena.biomeType,
+      weather: this.scene.arena.weather,
+    };
+  }
+
+  /**
+   * Override to log the result as JSON before calling the parent class's end method.
+   */
+  end(): void {
+    // Log the result in JSON format
+    console.log(JSON.stringify(this.getResult(), null, 2));
+
+    // Call the parent class's end method to continue with the phase logic
+    super.end();
+  }
 }

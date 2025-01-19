@@ -53,4 +53,7 @@ export default class ModifierData {
       return null;
     }
   }
+  getClassName(): string {
+    return this.className;
+  }
 }

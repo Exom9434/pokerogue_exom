@@ -41,4 +41,31 @@ export class ObtainStatusEffectPhase extends PokemonPhase {
     }
     this.end();
   }
+  end() {
+    console.log(JSON.stringify(this.getResult(), null, 2));
+    super.end();
+  }
+
+  /**
+   * Phase의 결과를 반환
+   */
+  getResult(): object {
+    const pokemon = this.getPokemon();
+    return {
+      phase: this.getPhaseName(),
+      status: "completed",
+      pokemonName: pokemon?.getName() ?? "Unknown",
+      statusEffect: this.statusEffect ?? "None",
+      turnsRemaining: this.turnsRemaining ?? 0,
+      sourcePokemon: this.sourcePokemon?.getName() ?? null,
+      sourceText: this.sourceText ?? null
+    };
+  }
+
+  /**
+   * Phase 이름 반환
+   */
+  protected getPhaseName(): string {
+    return "ObtainStatusEffectPhase";
+  }
 }

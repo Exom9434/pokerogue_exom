@@ -27,4 +27,22 @@ export class MoveHeaderPhase extends BattlePhase {
       this.end();
     }
   }
+
+  /**
+   * 종료 시점에 실행되는 메서드로, Phase 결과를 콘솔로 출력
+   */
+  public override end(): void {
+    const phaseResult = {
+      phase: "MoveHeaderPhase",
+      status: "completed",
+      pokemon: this.pokemon.getName(),
+      move: this.move.getMove().name,
+      canMove: this.canMove(),
+    };
+
+    // 콘솔에 Phase 결과를 JSON 형태로 기록
+    console.log(JSON.stringify(phaseResult, null, 2));
+
+    super.end();
+  }
 }
