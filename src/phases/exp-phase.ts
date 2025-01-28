@@ -61,4 +61,3 @@ export class ExpPhase extends PlayerPartyMemberPokemonPhase {
     super.end();
   }
 }
-
